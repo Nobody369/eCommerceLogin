@@ -1,5 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const path = require('path');
+const { processAllPDFs } = require('../src/utils/pdfProcessor');
+const { storeDocument } = require('../src/services/documentService');
 
 const prisma = new PrismaClient();
 
@@ -82,6 +85,109 @@ async function main() {
       data: userData
     });
     console.log(`✅ Created ${user.role.toLowerCase()}: ${user.firstName} ${user.lastName} (${user.email})`);
+  }
+
+  // Process PDF files and store in database
+  console.log('📄 Processing PDF files...');
+  const pdfDirectory = path.join(__dirname, '../../web/public/assets/pdf');
+  
+  try {
+    const processedPDFs = await processAllPDFs(pdfDirectory);
+    
+    if (processedPDFs.length > 0) {
+      console.log(`📚 Found ${processedPDFs.length} PDF files to process`);
+      
+      // Clear existing documents
+      await prisma.document.deleteMany({});
+      console.log('🧹 Cleared existing documents');
+      
+      // Store processed PDFs in database
+      for (const pdfData of processedPDFs) {
+        try {
+          await storeDocument({
+            filename: pdfData.filename,
+            title: pdfData.title,
+            content: pdfData.content,
+            filePath: pdfData.filePath,
+            uploadedBy: 'system' // System user for seeded documents
+          });
+          console.log(`✅ Stored document: ${pdfData.filename}`);
+        } catch (error) {
+          console.error(`❌ Failed to store ${pdfData.filename}:`, error.message);
+        }
+      }
+    } else {
+      console.log('📄 No PDF files found in the assets/pdf directory');
+      console.log('💡 Place PDF files in web/public/assets/pdf/ to enable document search');
+    }
+  } catch (error) {
+    console.error('❌ Error processing PDFs:', error.message);
+    console.log('💡 Make sure PDF files are placed in web/public/assets/pdf/ directory');
+  }
+
+  // Create sample products
+  console.log('🛍️ Creating sample products...');
+  const sampleProducts = [
+    {
+      name: 'iPhone 15 Pro',
+      description: 'Latest iPhone with titanium design, A17 Pro chip, and advanced camera system',
+      price: 999.99,
+      category: 'Electronics'
+    },
+    {
+      name: 'MacBook Air M3',
+      description: 'Ultra-thin laptop with M3 chip, 13-inch Liquid Retina display, and all-day battery life',
+      price: 1099.99,
+      category: 'Electronics'
+    },
+    {
+      name: 'AirPods Pro',
+      description: 'Wireless earbuds with active noise cancellation and spatial audio',
+      price: 249.99,
+      category: 'Electronics'
+    },
+    {
+      name: 'Nike Air Max 270',
+      description: 'Comfortable running shoes with Max Air cushioning and breathable upper',
+      price: 150.00,
+      category: 'Sports'
+    },
+    {
+      name: 'Samsung Galaxy S24',
+      description: 'Android smartphone with AI-powered features and professional-grade camera',
+      price: 799.99,
+      category: 'Electronics'
+    },
+    {
+      name: 'Coffee Maker Deluxe',
+      description: 'Programmable coffee maker with thermal carafe and auto-shutoff feature',
+      price: 89.99,
+      category: 'Home & Kitchen'
+    },
+    {
+      name: 'Wireless Charging Pad',
+      description: 'Fast wireless charging pad compatible with iPhone and Android devices',
+      price: 29.99,
+      category: 'Electronics'
+    },
+    {
+      name: 'Bluetooth Speaker',
+      description: 'Portable waterproof speaker with 360-degree sound and 12-hour battery',
+      price: 79.99,
+      category: 'Electronics'
+    }
+  ];
+
+  // Clear existing products
+  await prisma.product.deleteMany({});
+  console.log('🧹 Cleared existing products');
+
+  // Create products
+  for (const productData of sampleProducts) {
+    const product = await prisma.product.create({
+      data: productData
+    });
+    console.log(`✅ Created product: ${product.name} (${product.category})`);
   }
 
   console.log('🎉 Database seeded successfully!');

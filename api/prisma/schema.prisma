@@ -27,3 +27,31 @@ model User {
 
   @@map("users")
 }
+
+model Document {
+  id              String   @id @default(cuid())
+  filename        String
+  title           String?
+  content         String
+  contentTsvector Unsupported("tsvector")?
+  filePath        String
+  uploadedBy      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("documents")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  price           Decimal?
+  category        String?
+  isActive        Boolean  @default(true)
+  searchTsvector  Unsupported("tsvector")?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("products")
+}

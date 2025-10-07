@@ -19,6 +19,11 @@
           As a buyer, you can browse products and make purchases.
         </p>
       </div>
+
+      <!-- Document Search Section -->
+      <div class="search-section">
+        <DocumentSearch />
+      </div>
       
       <div class="features-grid">
         <div class="feature-card" v-if="user?.role === 'SELLER'">
@@ -52,9 +57,13 @@
 <script>
 import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
+import DocumentSearch from './DocumentSearch.vue'
 
 export default {
   name: 'Dashboard',
+  components: {
+    DocumentSearch
+  },
   setup() {
     const user = ref(null)
     const loading = ref(true)
@@ -139,6 +148,14 @@ export default {
 .welcome-card p {
   color: #666;
   font-size: 1.1rem;
+}
+
+.search-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
 }
 
 .features-grid {

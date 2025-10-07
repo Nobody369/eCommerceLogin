@@ -1,204 +1,115 @@
-# eCommerce Login Platform
+# PDF搜索系统
 
-A simple eCommerce platform with Vue.js frontend and Fastify backend, featuring user authentication for both buyers and sellers.
+## 🚀 快速开始
 
-## Project Structure
+### 1. 环境要求
+- Node.js 18+
+- PostgreSQL 12+
+- npm
 
-```
-eCommerceLogin/
-├── api/                 # Backend API (Fastify + Prisma)
-│   ├── src/
-│   │   └── server.js    # Main server file
-│   ├── prisma/
-│   │   └── schema.prisma # Database schema
-│   ├── package.json
-│   └── env.example      # Environment variables template
-├── web/                 # Frontend (Vue.js)
-│   ├── src/
-│   │   ├── components/  # Vue components
-│   │   ├── App.vue      # Main app component
-│   │   └── main.js      # App entry point
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-├── docker-compose.yml   # PostgreSQL Docker setup
-├── init.sql            # Database initialization
-├── setup.sh            # Linux/Mac setup script
-└── setup.bat           # Windows setup script
-```
+### 2. 一键部署
 
-## Features
-
-- **User Authentication**: Login and registration for buyers and sellers
-- **Role-based Access**: Different dashboards for buyers and sellers
-- **JWT Authentication**: Secure token-based authentication
-- **Database**: PostgreSQL with Docker and Prisma ORM
-- **Modern Stack**: Vue 3 + Fastify + Prisma + PostgreSQL
-
-## Prerequisites
-
-- **Docker** and **Docker Compose** installed on your system
-- **Node.js** (v16 or higher) and **npm** (for local development only)
-
-## Quick Setup (Recommended)
-
-### Option 1: Full Docker Setup (Recommended)
-
-**For Linux/Mac:**
+**Windows:**
 ```bash
-chmod +x setup.sh
-./setup.sh
+deploy.bat
 ```
 
-**For Windows:**
-```cmd
-setup.bat
-```
-
-This will start all services (PostgreSQL, API, and Web) in Docker containers with hot reload enabled.
-
-### Option 2: Docker + Local Development
-
-1. **Start PostgreSQL with Docker:**
-   ```bash
-   docker-compose up -d postgres
-   ```
-
-2. **Backend Setup (API):**
-   ```bash
-   cd api
-   cp env.example .env
-   npm install
-   npx prisma generate
-   npx prisma migrate dev --name init
-   npm run dev
-   ```
-
-3. **Frontend Setup (Web):**
-   ```bash
-   cd web
-   npm install
-   npm run dev
-   ```
-
-### Option 3: Production Docker Setup
-
+**Mac/Linux:**
 ```bash
-docker-compose -f docker-compose.prod.yml up --build -d
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-## Database Configuration
-
-The application uses PostgreSQL running in Docker with the following configuration:
-- **Host**: localhost
-- **Port**: 5432
-- **Database**: ecommerce_db
-- **Username**: ecommerce_user
-- **Password**: ecommerce_password
-
-## Running the Application
-
-- **Backend API**: `http://localhost:3001`
-- **Frontend**: `http://localhost:3000`
-- **PostgreSQL**: `localhost:5432`
-
-## Docker Commands
-
-### Development Commands
-
+### 3. 启动服务
 ```bash
-# Start all services (development)
-docker-compose up --build -d
+# Windows
+start_services.bat
 
-# View logs for all services
-docker-compose logs
-
-# View logs for specific service
-docker-compose logs api
-docker-compose logs web
-docker-compose logs postgres
-
-# Stop all services
-docker-compose down
-
-# Restart a specific service
-docker-compose restart api
-
-# Access container shell
-docker-compose exec api sh
-docker-compose exec web sh
-docker-compose exec postgres psql -U ecommerce_user -d ecommerce_db
-
-# Rebuild and restart services
-docker-compose up --build -d
+# Mac/Linux  
+./start_services.sh
 ```
 
-### Production Commands
+### 4. 访问应用
+- 前端: http://localhost:3000
+- 后端: http://localhost:3001
 
+## 🎯 功能特性
+
+- ✅ **Google风格搜索建议** - 实时下拉建议
+- ✅ **智能全文搜索** - 支持部分匹配
+- ✅ **PDF文本提取** - 自动处理PDF文件
+- ✅ **用户认证** - JWT安全登录
+- ✅ **响应式设计** - 桌面+移动端
+
+## 🔧 手动部署
+
+### 数据库设置
 ```bash
-# Start production services
-docker-compose -f docker-compose.prod.yml up --build -d
-
-# Stop production services
-docker-compose -f docker-compose.prod.yml down
+createdb ecommerce_db
+psql -U postgres -c "CREATE USER ecommerce_user WITH PASSWORD 'ecommerce_password';"
 ```
 
-### Database Commands
-
+### 后端设置
 ```bash
-# Reset database (removes all data)
-docker-compose down -v
-docker-compose up -d postgres
-
-# Run Prisma migrations
-docker-compose exec api npx prisma migrate dev
-
-# Generate Prisma client
-docker-compose exec api npx prisma generate
-
-# Open Prisma Studio
-docker-compose exec api npx prisma studio
+cd api
+npm install
+cp env.example .env
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 ```
 
-## API Endpoints
+### 前端设置
+```bash
+cd web
+npm install
+```
 
-- `GET /health` - Health check
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /auth/me` - Get current user profile (requires authentication)
+## 📝 使用说明
 
-## User Roles
+1. 注册/登录用户
+2. 进入Dashboard
+3. 在搜索框输入关键词
+4. 查看实时建议下拉框
+5. 选择建议或按Enter搜索
 
-- **BUYER**: Can browse products and make purchases
-- **SELLER**: Can manage products and view sales
+## 📁 PDF文件处理
 
-## Database Schema
+将PDF文件放在 `web/public/assets/pdf/` 目录下，然后运行：
+```bash
+cd api && npm run db:seed
+```
 
-The User model includes:
-- `id`: Unique identifier
-- `email`: User email (unique)
-- `password`: Hashed password
-- `firstName`: User's first name
-- `lastName`: User's last name
-- `role`: User role (BUYER or SELLER)
-- `createdAt`: Account creation timestamp
-- `updatedAt`: Last update timestamp
+## 🔧 故障排除
 
-## Development
+**数据库连接失败:**
+```bash
+pg_ctl status
+brew services restart postgresql  # Mac
+```
 
-- Backend runs on port 3001
-- Frontend runs on port 3000
-- Frontend proxies API requests to backend
-- Hot reload enabled for both frontend and backend
+**环境变量问题:**
+确保 `.env` 文件中的 `DATABASE_URL` 用双引号包围
 
-## Next Steps
+**搜索功能异常:**
+```bash
+psql -U postgres -d ecommerce_db -c "SELECT * FROM pg_indexes WHERE tablename = 'documents';"
+```
 
-This is a basic foundation. Future enhancements could include:
-- Product management
-- Shopping cart functionality
-- Order processing
-- Payment integration
-- Enhanced UI/UX
-- File uploads for product images
-- Search and filtering
-- Admin dashboard
+## 🛠️ 技术栈
+
+- **前端**: Vue.js 3 + Vite
+- **后端**: Fastify + Prisma
+- **数据库**: PostgreSQL + FTS
+- **PDF处理**: pdf-parse
+
+## 📊 核心API
+
+- `GET /api/search/suggestions?q=sa&limit=8` - 搜索建议
+- `POST /api/search` - 完整搜索
+- `POST /api/auth/login` - 用户登录
+- `POST /api/auth/register` - 用户注册
+
+---
+
+**🎉 就这么简单！** 现在你有了一个完整的PDF搜索系统。
